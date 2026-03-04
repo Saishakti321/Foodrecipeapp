@@ -85,23 +85,19 @@ export default function EditRecipe() {
           name="title"
           value={recipe.title}
           onChange={handleChange}
-          placeholder="Title"
-        />
-
+          placeholder="Title"/>
         <input
           type="text"
           name="ingredients"
           value={recipe.ingredients}
           onChange={handleChange}
-          placeholder="Ingredients (comma separated)"
-        />
+          placeholder="Ingredients (comma separated)"/>
 
         <textarea
           name="instructions"
           value={recipe.instructions}
           onChange={handleChange}
-          placeholder="Instructions"
-        />
+          placeholder="Instructions" />
 
         <input
           type="text"

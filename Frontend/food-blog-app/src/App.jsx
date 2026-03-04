@@ -1,95 +1,72 @@
 
 
-import React from 'react'
-import './App.css'
+
+import React from "react"
+import "./App.css"
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
-import Home from './pages/Home'
-import MainNavigation from './components/MainNavigation'
-import axios from 'axios'
-import AddFoodRecipe from './pages/AddFoodRecipe'
-import RecipeDetails from './pages/RecipeDetails'
-import MyRecipe from './pages/MyRecipe'
-import EditRecipe from './pages/EditRecipe'
-import FavRecipe from './pages/FavRecipe'
 
-
-const getAllRecipes = async () => {
-  try {
-    const res = await axios.get("http://localhost:5000/recipe")
-    return res.data
-  } catch (err) {
-    return []
-  }
-}
-
-const getMyRecipe = async () => {
-  try {
-    const token = localStorage.getItem("token")
-    if (!token) return []
-
-    const res = await axios.get(
-      "http://localhost:5000/recipe/my",
-      {
-        headers: {
-          Authorization: "Bearer " + token
-        }
-      }
-    )
-
-    return res.data
-  } catch (err) {
-    return []
-  }
-}
-
+import MainNavigation from "./components/MainNavigation"
+import Home from "./pages/Home"
+import MyRecipe from "./pages/MyRecipe"
+import FavRecipe from "./pages/FavRecipe"
+import AddFoodRecipe from "./pages/AddFoodRecipe"
+import EditRecipe from "./pages/EditRecipe"
+import RecipeDetails from "./pages/RecipeDetails"
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainNavigation />,
+    element: <MainNavigation />,   
     children: [
 
-      { 
-        path: "/", 
-        element: <Home />, 
-        loader: getAllRecipes 
-      },
-      
-      { path: "/recipe", element: <Home />, loader: getAllRecipes },
-
-      { 
-        path: "/myRecipe", 
-        element: <MyRecipe />, 
-        
+    
+      {
+        path: "/",
+        element: <Home />
       },
       {
-  path: "/editRecipe/:id",
-  element: <EditRecipe />
-},
-
-      { 
-        path: "/favRecipe", 
-        element: <FavRecipe /> 
+        path: "/category/:name",
+        element: <Home />
       },
 
-      { 
-        path: "/addRecipe", 
-        element: <AddFoodRecipe /> 
+    
+      {
+        path: "/myRecipe",
+        element: <MyRecipe />
+      },
+      {
+        path: "/favRecipe",
+        element: <FavRecipe />
       },
 
-      { 
-        path: "/recipe/:id", 
-        element: <RecipeDetails /> 
+      
+      {
+        path: "/addRecipe",
+        element: <AddFoodRecipe />
+      },
+
+      
+      {
+        path: "/editRecipe/:id",
+        element: <EditRecipe />
+      },
+
+      
+      {
+        path: "/recipe/:id",
+        element: <RecipeDetails />
       }
 
     ]
   }
 ])
 
-const App = () => {
+function App() {
   return (
     <RouterProvider
       router={router}
-      fallbackElement={<h2 style={{ textAlign: "center" }}>Loading...</h2>}
+      fallbackElement={
+        <h2 style={{ textAlign: "center" }}>Loading...</h2>
+      }
     />
   )
 }

@@ -22,8 +22,6 @@ const InputForm = ({ setIsOpen, setIsLogin }) => {
                 `http://localhost:5000/${endpoint}`,
                 { email, password }
             )
-
-            // Save token and user
             localStorage.setItem("token", res.data.token)
             localStorage.setItem("user", JSON.stringify(res.data.user))
 

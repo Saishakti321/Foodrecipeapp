@@ -9,7 +9,6 @@ import { NavLink } from "react-router-dom";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  // true = logged in
   const [isLogin, setIsLogin] = useState(
     !!localStorage.getItem("token")
   );
@@ -18,7 +17,6 @@ const Navbar = () => {
 
   const handleAuthClick = () => {
     if (isLogin) {
-      // LOGOUT
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       setIsLogin(false);
@@ -66,7 +64,7 @@ const Navbar = () => {
             </NavLink>
           </li>
 
-          {/* Login / Logout */}
+      
           <li onClick={handleAuthClick}>
             <p className="login">
               {isLogin ? "Logout" : "Login"}{user?.email ? `(${user?.email})` : ""}
