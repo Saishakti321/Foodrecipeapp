@@ -12,8 +12,11 @@ const userSchema= mongoose.Schema({
     },
      favorites: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Recipes"
+      // type: mongoose.Schema.Types.ObjectId,
+      // ref: "Recipes"
+      recipeId:String,
+      source:String
+      
     }
   ]
 

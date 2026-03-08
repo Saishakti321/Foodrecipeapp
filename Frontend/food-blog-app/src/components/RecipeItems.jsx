@@ -20,6 +20,7 @@ const RecipeItems = ({
 
   const navigate = useNavigate()
   const location = useLocation()
+
   useEffect(() => {
 
     if (customData) {
@@ -28,6 +29,7 @@ const RecipeItems = ({
     }
 
     const fetchRecipes = async () => {
+
       try {
 
         const token = localStorage.getItem("token")
@@ -35,7 +37,7 @@ const RecipeItems = ({
         let config = {}
 
         if (isTrending) {
-          url = `http://localhost:5000/recipe/trending?page=${page}&limit=10`
+          url = `http://localhost:5000/recipe/trending`
         }
 
         else if (category && category !== "") {
@@ -43,9 +45,27 @@ const RecipeItems = ({
         }
 
         else if (location.pathname === "/myRecipe") {
+
           if (!token) return
+
           url = `http://localhost:5000/recipe/my?page=${page}&limit=10`
-          config = { headers: { Authorization: "Bearer " + token } }
+
+          config = {
+            headers: { Authorization: "Bearer " + token }
+          }
+
+        }
+
+        else if (location.pathname === "/favRecipe") {
+
+          if (!token) return
+
+          url = `http://localhost:5000/recipe/favorites`
+
+          config = {
+            headers: { Authorization: "Bearer " + token }
+          }
+
         }
 
         else {
@@ -54,69 +74,118 @@ const RecipeItems = ({
 
         const res = await axios.get(url, config)
 
-        setRecipes(res.data.recipes || res.data)
-        setTotalPages(res.data.totalPages || 1)
+        if (location.pathname === "/favRecipe") {
+
+          const favRecipes = res.data || []
+
+          setRecipes(favRecipes)
+
+          setFavorites(favRecipes.map(r => r._id.toString()))
+
+        }
+
+        else {
+
+          setRecipes(res.data.recipes || res.data)
+          setTotalPages(res.data.totalPages || 1)
+
+        }
 
       } catch (err) {
         console.log(err)
       }
+
     }
 
     fetchRecipes()
 
   }, [category, page, location.pathname, isTrending, customData])
+
+
   useEffect(() => {
+
     const fetchFavorites = async () => {
+
       try {
+
         const token = localStorage.getItem("token")
         if (!token) return
 
         const res = await axios.get(
           "http://localhost:5000/recipe/favorites",
-          { headers: { Authorization: "Bearer " + token } }
+          {
+            headers: { Authorization: "Bearer " + token }
+          }
         )
 
-        setFavorites(res.data.map(r => r._id))
+        const favRecipes = res.data || []
+
+        setFavorites(favRecipes.map(r => r._id.toString()))
 
       } catch (err) {
         console.log(err)
       }
+
     }
 
     fetchFavorites()
+
   }, [])
 
-  const handleFavorite = async (id) => {
+
+  // Favourite toggle .....
+
+  const handleFavorite = async (id, source="db") => {
+
     try {
+
       const token = localStorage.getItem("token")
-      if (!token) return alert("Please login first")
+
+      if (!token) {
+        alert("Please login first")
+        return
+      }
 
       await axios.put(
         `http://localhost:5000/recipe/favorite/${id}`,
-        {},
-        { headers: { Authorization: "Bearer " + token } }
+        { source },
+        {
+          headers: {
+            Authorization: "Bearer " + token
+          }
+        }
       )
 
+      const idStr = id.toString()
+
       setFavorites(prev =>
-        prev.includes(id)
-          ? prev.filter(f => f !== id)
-          : [...prev, id]
+        prev.includes(idStr)
+          ? prev.filter(f => f !== idStr)
+          : [...prev, idStr]
       )
 
     } catch (err) {
       console.log(err)
     }
+
   }
 
+
+  // DELETE....
+
   const handleDelete = async (id) => {
+
     if (!window.confirm("Delete this recipe?")) return
 
     try {
+
       const token = localStorage.getItem("token")
 
       await axios.delete(
         `http://localhost:5000/recipe/${id}`,
-        { headers: { Authorization: "Bearer " + token } }
+        {
+          headers: { Authorization: "Bearer " + token }
+        }
       )
 
       setRecipes(prev => prev.filter(r => r._id !== id))
@@ -124,6 +193,7 @@ const RecipeItems = ({
     } catch (err) {
       console.log(err)
     }
+
   }
 
   return (
@@ -133,15 +203,20 @@ const RecipeItems = ({
 
         {recipes.map((item) => {
 
-          const isFavorited = favorites.includes(item._id)
+          const id = (item._id || item.id)?.toString()
+          const source = item.source === "api" ? "api" : "db"
+
+          const isFavorited = favorites.includes(id)
+
           const avgRating = item.averageRating || 0
           const reviewCount = item.reviews?.length || 0
 
           return (
+
             <div
-              key={item._id}
+              key={id}
               className="modern-card"
-              onClick={() => navigate(`/recipe/${item._id}`)}
+              onClick={() => navigate(`/recipe/${id}`)}
             >
 
               {isMyRecipePage && (
@@ -149,12 +224,8 @@ const RecipeItems = ({
                   className="action-icons"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <FaEdit
-                    onClick={() => navigate(`/editRecipe/${item._id}`)}
-                  />
-                  <FaTrash
-                    onClick={() => handleDelete(item._id)}
-                  />
+                  <FaEdit onClick={() => navigate(`/editRecipe/${id}`)} />
+                  <FaTrash onClick={() => handleDelete(id)} />
                 </div>
               )}
 
@@ -171,13 +242,17 @@ const RecipeItems = ({
               />
 
               <div className="card-body">
+
                 <div className="title">{item.title}</div>
+
                 <div className="rating">
                   {"⭐".repeat(Math.round(avgRating))}
                 </div>
+
               </div>
 
               <div className="icons">
+
                 <div className="timer">
                   <BsStopwatch />
                   <span>{item.time || "30 mins"}</span>
@@ -187,26 +262,34 @@ const RecipeItems = ({
                   className="likes"
                   onClick={(e) => {
                     e.stopPropagation()
-                    handleFavorite(item._id)
+                    handleFavorite(id, source)
                   }}
                 >
                   <FaHeart
                     style={{
-                      color: isFavorited ? "red" : "#bbb"
+                      color: isFavorited ? "red" : "#bbb",
+                      cursor: "pointer"
                     }}
                   />
+
                   <span>{reviewCount}</span>
+
                 </div>
+
               </div>
 
             </div>
+
           )
+
         })}
 
       </div>
 
       {!hidePagination && totalPages > 1 && (
+
         <div className="pagination">
+
           <button
             disabled={page === 1}
             onClick={() => setPage(p => p - 1)}
@@ -222,7 +305,9 @@ const RecipeItems = ({
           >
             Next
           </button>
+
         </div>
+
       )}
 
     </div>
@@ -230,3 +315,4 @@ const RecipeItems = ({
 }
 
 export default RecipeItems
+

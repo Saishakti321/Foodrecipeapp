@@ -1,13 +1,3 @@
-//todo: bcrypt = bcrypt is a library used to hash passwords before saving them in the database.
-
-//? It converts a normal password like:
-//!mypassword123
-
-//? Into something like:
-//! $2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36Q8pCkK0N7Kc2kP9Z1jGq.
-
-//? This process is called hashing.
-
 
 
 const User=require("../models/user")
